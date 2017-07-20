@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello world</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/geolocator/2.1.0/geolocator.js"></script>
+    <script src="arframe/main/resources/js/aframe.js"></script>
+    <script src="arframe/main/resources/js/argon.min.js"></script>
+    <script src="arframe/main/build.js"></script>
+    <script src="arframe/main/resources/js/CSS3DArgonRenderer.js"></script>
+    <script src="arframe/main/resources/js/CSS3DArgonHUD.js"></script>
+    <script src="arframe/main/resources/js/aframe-look-at-component.js"></script>
+  </head>
+
+  <style>
+    .unknown {
+      color: red;
+    }
+
+    .found {
+      color: green;
+    }
+  </style>
+  <body>
+
+    <!-- <h1>Hide Go Seek</h1> -->
+
+    <h2>poseStatus:<span id='poseStatus'> not found</span></h2>
+
+    <h4>Initial LLA</h4>
+    <h3 id='initLLA'>UNKNOWN</h3>
+
+    <h4>Initial EECF</h4>
+    <h3 id='initPose'>UNKNOWN</h3>
+
+    <h4>Current LLA</h4>
+    <h3 id='gpsCartoDeg'>UNKNOWN</h3>
+
+    <h4>Current EECF</h4>
+    <h3 id='userPose'>UNKNOWN</h4>
+
+    <!-- <h4>userPose</h4>
+    <h2 id='userPose'>UNKNOWN</h2> -->
+    <div id='counter'></div>
+
+
+    <ar-scene>
+      <!--OPTION 2-->
+      <!-- <a-entity id='madRefFrame' referenceframe='lla: -84.332648 33.759408 310'></a-entity> -->
+    </ar-scene>
+
+    <script>
+
+    var loop = 0;
+
+    var count = 0;
+    var counter = document.getElementById('counter');
+
+    var poseStatusEl = document.getElementById('poseStatus');
+
+    var initLLAEl = document.getElementById('initLLA')
+    var initPoseEl = document.getElementById('initPose');
+
+    var gpsCartoDegEl = document.getElementById('gpsCartoDeg');
+    var userPoseEl = document.getElementById('userPose');
+
+    // var userPoseEl = document.getElementById('userPose');
+
+
+
+
+
+    //Latitude: 33.759408 | Longitude: -84.332648 Altitude: 310 meters
+
+
+      var geoOptions = {
+    	   enableHighAccuracy: true,
+         desiredAccuracy: 30,
+   	     timeout: 5000,
+    	   maximumWait: 10000,
+    	   maximumAge: 0,
+    	   fallbackToIP: true
+       };
+
+      var Cesium = Argon.Cesium;
+      var Cartesian3 = Cesium.Cartesian3;
+      var ConstantPositionProperty = Cesium.ConstantPositionProperty;
+      var PositionProperty = Cesium.PositionProperty;
+      var ReferenceFrame = Cesium.ReferenceFrame;
+      var ReferenceEntity = Cesium.ReferenceEntity;
+
+      // OPTION 1
+      var app = Argon.init();
+
+      app.context.setDefaultReferenceFrame(app.context.localOriginEastUpSouth);
+      app.context.maxDeltaTime = 1000;
+
+      app.updateEvent.addEventListener(function (frame) {
+
+        var userPose = app.context.getEntityPose(app.context.user);
+
+        if (userPose.poseStatus & Argon.PoseStatus.KNOWN) {
+
+            poseStatusEl.innerHTML = ' found';
+            poseStatusEl.className = 'found'; //could do classList.add but then would have to remove as well
+
+
+            //INITIAL LLA
+            var firstLLA = { lla : { x : -84.33222000, y : 33.75943000, z : 310.00000000 }};
+            initLLA.innerHTML= `LON: ${firstLLA.lla.x.toFixed(8)} <br/>LAT: ${firstLLA.lla.y.toFixed(8)} <br/>HGT: ${firstLLA.lla.z.toFixed(8)}`;
+
+            //INITIAL EECF
+            var firstRef = Cartesian3.fromDegrees(firstLLA.lla.x, firstLLA.lla.y, firstLLA.lla.z);
+            var options = { position: new ConstantPositionProperty(firstRef, ReferenceFrame.FIXED), orientation:  Cesium.Quaternion.IDENTITY};
+            var firstRefEntity = new Cesium.Entity(options);
+
+            //INITIAL LOCAL
+            var firstPose = app.context.getEntityPose(firstRefEntity);
+            initPoseEl.innerHTML = `x: ${firstPose.position.x.toFixed(8)}<br/>y: ${firstPose.position.y.toFixed(8)}<br/>z: ${firstPose.position.z.toFixed(8)}`;
+
+
+            //CURRENT LLA
+            var userPoseFIXED = app.context.getEntityPose(app.context.user, ReferenceFrame.FIXED);
+            var currentLLA = Cesium.Ellipsoid.WGS84.cartesianToCartographic(userPoseFIXED.position);
+
+            if (currentLLA) {
+
+                currentCarto = {
+                    'lon' : +(Cesium.CesiumMath.toDegrees(currentLLA.longitude).toFixed(5) + '000'),
+                    'lat' : +(Cesium.CesiumMath.toDegrees(currentLLA.latitude).toFixed(5) + '000'),
+                    'hgt' : +(currentLLA.height.toFixed(5) + '000')
+                };
+            }
+
+            gpsCartoDegEl.innerHTML= `LON: ${currentCarto.lon.toFixed(8)} <br/>LAT: ${currentCarto.lat.toFixed(8)} <br/>HGT: ${currentCarto.hgt.toFixed(8)}`;
+
+            //CURRENT EECF
+            var currentData = { lla : { x : +(currentCarto.lon.toFixed(5) + '000'), y : +(currentCarto.lat.toFixed(5) + '000'), z : +(currentCarto.hgt.toFixed(5) + '000') }};
+
+            var currentRef = Cartesian3.fromDegrees(+(currentData.lla.x.toFixed(8)), +(currentData.lla.y.toFixed(8)), +(currentData.lla.z.toFixed(8)));
+            var options = { position: new ConstantPositionProperty(currentRef, ReferenceFrame.FIXED), orientation:  Cesium.Quaternion.IDENTITY};
+            var currentRefEntity = new Cesium.Entity(options);
+
+            //CURRENT LOCAL
+            var currentPose = app.context.getEntityPose(currentRefEntity);
+
+            userPoseEl.innerHTML = `x: ${currentPose.position.x.toFixed(8)} <br/>y: ${currentPose.position.y.toFixed(8)} <br/>z: ${currentPose.position.z.toFixed(8)}`;
+
+
+
+
+
+
+
+
+          //   geolocator.locate(geoOptions, function (err, loc) {
+          //      //console.log(err || loc);
+          //
+	        //      var userRefData = { lla : { x : loc.coords.longitude, y : loc.coords.latitude, z : 310 }};
+          //      var userRef = Cartesian3.fromDegrees(userRefData.lla.x, userRefData.lla.y, userRefData.lla.z);
+          //      var options = { position: new ConstantPositionProperty(userRef, ReferenceFrame.FIXED),
+          //                  orientation:  Cesium.Quaternion.IDENTITY
+          //                };
+           //
+          //     var userRefEntity = new Cesium.Entity(options);
+          //     var devPose = app.context.getEntityPose(userRefEntity);
+          //     userPoseEl.innerHTML = `LON: ${devPose.position.x} LAT: ${devPose.position.y} HGT: 0`;
+          //  });
+
+
+            // userPose = app.context.getEntityPose(app.context.user);
+            // gpsCartoDegEl.innerHTML= `LON: ${gpsCartographicDeg.longitude} <br/>LAT: ${gpsCartographicDeg.latitude} <br/>HGT: ${gpsCartographicDeg.height}`;
+            // userllaEl.innerHTML = `LON: ${userLLA.longitude} <br/>LAT: ${userLLA.latitude} <br/>HGT: ${userLLA.height}`;
+            //userPoseEl.innerHTML = `LON: ${userPoseFIXED.position.x} LAT: ${userPoseFIXED.position.y} HGT: ${userPoseFIXED.position.z}`;
+
+
+            // if(loop < 10){
+            //
+            //   // console.log('userPose');
+            //   // console.log(userPose);
+            //
+            //   // console.log('eyePose');
+            //   // console.log(eyePose);
+            //   //
+            //   // console.log('userLLA');
+            //   // console.log(userLLA);
+            //   //
+            //   // console.log('gpsCartographicDeg');
+            //   // console.log(gpsCartographicDeg);
+            //
+            //   loop += 1;
+            // }
+
+          } else {
+            // if we don't know the user pose we can't do anything
+            console.log("we don't know.");
+            poseStatusEl.className = "unknown";
+            return;
+          };
+
+        // if (count <= 10){
+        //
+        //   counter.innerHTML = count;
+        //   count += 1;
+        // }
+
+      });
+
+    </script>
+</body>
+</html>
