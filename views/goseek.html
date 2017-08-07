@@ -1,0 +1,27 @@
+<html>
+  <head>
+  <script src="https://rawgit.com/argonjs/argon-aframe/master/dist/argon-aframe.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/geolocator/2.1.0/geolocator.js"></script>
+  <script src="arframe/main/resources/js/aframe.js"></script>
+  <script src="arframe/main/resources/js/argon.min.js"></script>
+  <script src="arframe/main/build.js"></script>
+  <script src="arframe/main/resources/js/CSS3DArgonRenderer.js"></script>
+  <script src="arframe/main/resources/js/CSS3DArgonHUD.js"></script>
+  <script src="arframe/main/resources/js/aframe-look-at-component.js"></script>
+  </head>
+  <body>
+
+  <ar-frame id="viewer" visible="true">
+    <a-scene>
+      {{! LOOP OVER ALL POINTS IN THE SET OF POINTS }}
+      {{#points}}
+      <ar-geopose id="GT" lla="{{initial.x}} {{initial.y}}" userotation="false">
+        {{! PUT PATH IN THE PATH VARIABLE }}
+        <a-entity meshline="lineWidth: 20; path: {{path}}; color: #E20049"></a-entity>
+      <ar-geopose>
+      {{/points}
+  </a-scene>
+</ar-frame>
+
+</body>
+</html>

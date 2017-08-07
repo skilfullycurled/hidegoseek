@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Layout</title>
+    <!--GPS Signal Good by Hali Gali Harun from the Noun Project-->
+    <!--GPS Signal Bad by Hali Gali Harun from the Noun Project-->
+    <!-- Record by AfterGrind from the Noun Project -->
+    <!-- Stop by Gaddafi Rusli from the Noun Project -->
+    <!-- pause by Gaddafi Rusli from the Noun Project -->
+    <!-- play by Gaddafi Rusli from the Noun Project -->
+    <!-- Upload by Ali Coşkun from the Noun Project -->
+    <!-- ways by Gregor Cresnar from the Noun Project -->
+    <!-- route by Creative Mania from the Noun Project -->
+    <!-- Direction Path by Hea Poh Lin from the Noun Project -->
+    <!-- Navigation by Hans from the Noun Project -->
+    <!-- Navigation by Chameleon Design from the Noun Project -->
+    <!-- route by Chameleon Design from the Noun Project -->
+    <!-- Gps Off by Nara Vieira da Silva from the Noun Project -->
+    <!-- GPS by Hea Poh Lin from the Noun Project -->
+    <!-- Actuality by Ralf Schmitzer from the Noun Project -->
+    <!-- Sync by P.J. Onori from the Noun Project -->
+    <!-- Check Mark by Jivan from the Noun Project -->
+    <!-- Satellite GPS by Tomasz Pasternak from the Noun Project -->
+
+    <link rel="stylesheet" type="text/css" href="css/loading.css"/>
+
+    <style>
+/*https://css-tricks.com/equidistant-objects-with-css/*/
+    #controls {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    #go {
+      display: none;
+    }
+
+    #signal {
+      /*display: none;*/
+    }
+
+    #syncing {
+      display: none;
+    }
+
+    #done {
+      display: none;
+    }
+
+
+    </style>
+
+
+
+  </head>
+
+
+
+<body>
+
+  <div id="display">
+    <object id='signal' type="image/svg+xml" data="icons/satellite.svg" class="ld"></object>
+    <object id='go' type="image/svg+xml" data="icons/move.svg" class="ld"></object>
+    <object id='syncing' type="image/svg+xml" data="icons/sync.svg" class="ld"></object>
+    <object id='done' type="image/svg+xml" data="icons/success.svg" class="ld"></object>
+  </div>
+<div id="controls">
+  <object id='locationStatus' type="image/svg+xml" data="icons/gps.svg" class="ld"></object>
+  <object id='start' type="image/svg+xml" data="icons/record.svg" class="ld"></object>
+  <object id='stop' type="image/svg+xml" data="icons/pause.svg" class="ld"></object>
+  <object id='transmit' type="image/svg+xml" data="icons/upload.svg" class="ld"></object>
+</div>
+
+<script>
+
+window.onload=function() {
+
+  // TOP FOUR DISPLAY ICONS
+
+  var sat = document.getElementById("signal")
+                     .contentDocument.getElementById("satellite");
+
+  var move = document.getElementById("go")
+                     .contentDocument.getElementById('move');
+
+  var sync = document.getElementById("syncing")
+                     .contentDocument.getElementById('sync');
+
+  var success = document.getElementById("done")
+                     .contentDocument.getElementById('success');
+
+
+  // BOTTOM FOUR BUTTONS
+  var gps = document.getElementById("locationStatus")
+                    .contentDocument.getElementById('gps');
+
+  var record = document.getElementById("start")
+                       .contentDocument.getElementById('record');
+
+  var pause = document.getElementById("stop")
+                      .contentDocument.getElementById('pause');
+
+  var upload = document.getElementById("transmit")
+                       .contentDocument.getElementById('upload');
+
+
+if ("geolocation" in navigator) {
+  /* geolocation is available */
+  console.log("geolocation is available");
+
+  navigator.geolocation.getCurrentPosition(function(position) {
+    console.log(position.coords.latitude, position.coords.longitude);
+  });
+} else {
+  console.log("geolocation IS NOT available")
+  /* geolocation IS NOT available */
+}
+
+
+
+
+}
+
+
+
+</script>
+
+
+<!-- <img src="icons/gps.svg" class="ld ld-spin"/> -->
+</body>
+
+
+</html>

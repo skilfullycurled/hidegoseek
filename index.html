@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>Hello world</title>
-    <script src="/socket.io/socket.io.js"></script>
+    <!-- <script src="/socket.io/socket.io.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/geolocator/2.1.0/geolocator.js"></script>
     <script src="arframe/main/resources/js/aframe.js"></script>
     <script src="arframe/main/resources/js/argon.min.js"></script>
@@ -30,13 +30,13 @@
     <h4>Initial LLA</h4>
     <h3 id='initLLA'>UNKNOWN</h3>
 
-    <h4>Initial EECF</h4>
+    <h4>Initial LOCAL</h4>
     <h3 id='initPose'>UNKNOWN</h3>
 
     <h4>Current LLA</h4>
     <h3 id='gpsCartoDeg'>UNKNOWN</h3>
 
-    <h4>Current EECF</h4>
+    <h4>Current LOCAL</h4>
     <h3 id='userPose'>UNKNOWN</h4>
 
     <!-- <h4>userPose</h4>
@@ -63,6 +63,12 @@
 
     var gpsCartoDegEl = document.getElementById('gpsCartoDeg');
     var userPoseEl = document.getElementById('userPose');
+
+    var currentData, currentLocal;
+
+    var geo = [];
+    var local = [];
+    var data = [];
 
     // var userPoseEl = document.getElementById('userPose');
 
@@ -117,6 +123,7 @@
             //INITIAL LOCAL
             var firstPose = app.context.getEntityPose(firstRefEntity);
             initPoseEl.innerHTML = `x: ${firstPose.position.x.toFixed(8)}<br/>y: ${firstPose.position.y.toFixed(8)}<br/>z: ${firstPose.position.z.toFixed(8)}`;
+            var initialLocal = { lla : { x : +(firstPose.position.x.toFixed(5) + '000'), y : +(firstPose.position.y.toFixed(5) + '000'), z : +(firstPose.position.z.toFixed(5) + '000') }};
 
 
             //CURRENT LLA
@@ -130,66 +137,41 @@
                     'lat' : +(Cesium.CesiumMath.toDegrees(currentLLA.latitude).toFixed(5) + '000'),
                     'hgt' : +(currentLLA.height.toFixed(5) + '000')
                 };
+
+
+                gpsCartoDegEl.innerHTML= `LON: ${currentCarto.lon.toFixed(8)} <br/>LAT: ${currentCarto.lat.toFixed(8)} <br/>HGT: ${currentCarto.hgt.toFixed(8)}`;
+
+                //CURRENT EECF
+                currentData = { lla : { x : +(currentCarto.lon.toFixed(5) + '000'), y : +(currentCarto.lat.toFixed(5) + '000'), z : +(currentCarto.hgt.toFixed(5) + '000') }};
+
+                var currentRef = Cartesian3.fromDegrees(+(currentData.lla.x.toFixed(8)), +(currentData.lla.y.toFixed(8)), +(currentData.lla.z.toFixed(8)));
+                var options = { position: new ConstantPositionProperty(currentRef, ReferenceFrame.FIXED), orientation:  Cesium.Quaternion.IDENTITY};
+                var currentRefEntity = new Cesium.Entity(options);
+
+                //CURRENT LOCAL
+                var currentPose = app.context.getEntityPose(currentRefEntity);
+
+                userPoseEl.innerHTML = `x: ${currentPose.position.x.toFixed(8)} <br/>y: ${currentPose.position.y.toFixed(8)} <br/>z: ${currentPose.position.z.toFixed(8)}`;
+                currentLocal = { lla : { x : +(currentPose.position.x.toFixed(5) + '000'), y : +(currentPose.position.y.toFixed(5) + '000'), z : +(currentPose.position.z.toFixed(5) + '000') }};
             }
 
-            gpsCartoDegEl.innerHTML= `LON: ${currentCarto.lon.toFixed(8)} <br/>LAT: ${currentCarto.lat.toFixed(8)} <br/>HGT: ${currentCarto.hgt.toFixed(8)}`;
+            if(loop < 10){
+              // console.log('this is the first event listener');
 
-            //CURRENT EECF
-            var currentData = { lla : { x : +(currentCarto.lon.toFixed(5) + '000'), y : +(currentCarto.lat.toFixed(5) + '000'), z : +(currentCarto.hgt.toFixed(5) + '000') }};
+              console.log('Initial LLA');
+              console.log(firstLLA);
 
-            var currentRef = Cartesian3.fromDegrees(+(currentData.lla.x.toFixed(8)), +(currentData.lla.y.toFixed(8)), +(currentData.lla.z.toFixed(8)));
-            var options = { position: new ConstantPositionProperty(currentRef, ReferenceFrame.FIXED), orientation:  Cesium.Quaternion.IDENTITY};
-            var currentRefEntity = new Cesium.Entity(options);
+              console.log('Initial LOCAL');
+              console.log(initialLocal);
 
-            //CURRENT LOCAL
-            var currentPose = app.context.getEntityPose(currentRefEntity);
+              console.log('Current LLA');
+              console.log(currentData);
 
-            userPoseEl.innerHTML = `x: ${currentPose.position.x.toFixed(8)} <br/>y: ${currentPose.position.y.toFixed(8)} <br/>z: ${currentPose.position.z.toFixed(8)}`;
+              console.log('Current LOCAL');
+              console.log(currentLocal);
 
-
-
-
-
-
-
-
-          //   geolocator.locate(geoOptions, function (err, loc) {
-          //      //console.log(err || loc);
-          //
-	        //      var userRefData = { lla : { x : loc.coords.longitude, y : loc.coords.latitude, z : 310 }};
-          //      var userRef = Cartesian3.fromDegrees(userRefData.lla.x, userRefData.lla.y, userRefData.lla.z);
-          //      var options = { position: new ConstantPositionProperty(userRef, ReferenceFrame.FIXED),
-          //                  orientation:  Cesium.Quaternion.IDENTITY
-          //                };
-           //
-          //     var userRefEntity = new Cesium.Entity(options);
-          //     var devPose = app.context.getEntityPose(userRefEntity);
-          //     userPoseEl.innerHTML = `LON: ${devPose.position.x} LAT: ${devPose.position.y} HGT: 0`;
-          //  });
-
-
-            // userPose = app.context.getEntityPose(app.context.user);
-            // gpsCartoDegEl.innerHTML= `LON: ${gpsCartographicDeg.longitude} <br/>LAT: ${gpsCartographicDeg.latitude} <br/>HGT: ${gpsCartographicDeg.height}`;
-            // userllaEl.innerHTML = `LON: ${userLLA.longitude} <br/>LAT: ${userLLA.latitude} <br/>HGT: ${userLLA.height}`;
-            //userPoseEl.innerHTML = `LON: ${userPoseFIXED.position.x} LAT: ${userPoseFIXED.position.y} HGT: ${userPoseFIXED.position.z}`;
-
-
-            // if(loop < 10){
-            //
-            //   // console.log('userPose');
-            //   // console.log(userPose);
-            //
-            //   // console.log('eyePose');
-            //   // console.log(eyePose);
-            //   //
-            //   // console.log('userLLA');
-            //   // console.log(userLLA);
-            //   //
-            //   // console.log('gpsCartographicDeg');
-            //   // console.log(gpsCartographicDeg);
-            //
-            //   loop += 1;
-            // }
+              loop += 1;
+            }
 
           } else {
             // if we don't know the user pose we can't do anything
@@ -205,6 +187,47 @@
         // }
 
       });
+
+
+
+      app.updateEvent.addEventListener(function (frame) {
+
+        // if(loop < 10){
+        //
+        //       // console.log('this is another event listener');
+        //       console.log('deltaTime:', frame.deltaTime, 'timestamp:', frame.timestamp);
+        //
+        // }
+
+        console.log("The time is now.")
+
+
+      });
+
+      var saveData = function(){
+
+        console.log("saving data");
+
+        var point = {};
+        var datetime = new Date();
+
+        point.date = datetime;
+        point.geo = currentData;
+        point.local = currentLocal;
+
+        console.log(point);
+
+
+        data.push(point)
+        //
+        console.log("Data is saved is currently length", data.length);
+      }
+
+      setInterval(saveData, 5000);
+
+
+
+
 
     </script>
 </body>

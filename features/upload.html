@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Layout</title>
+    <!--GPS Signal Good by Hali Gali Harun from the Noun Project-->
+    <!--GPS Signal Bad by Hali Gali Harun from the Noun Project-->
+    <!-- Record by AfterGrind from the Noun Project -->
+    <!-- Stop by Gaddafi Rusli from the Noun Project -->
+    <!-- pause by Gaddafi Rusli from the Noun Project -->
+    <!-- play by Gaddafi Rusli from the Noun Project -->
+    <!-- Upload by Ali Coşkun from the Noun Project -->
+    <!-- ways by Gregor Cresnar from the Noun Project -->
+    <!-- route by Creative Mania from the Noun Project -->
+    <!-- Direction Path by Hea Poh Lin from the Noun Project -->
+    <!-- Navigation by Hans from the Noun Project -->
+    <!-- Navigation by Chameleon Design from the Noun Project -->
+    <!-- route by Chameleon Design from the Noun Project -->
+    <!-- Gps Off by Nara Vieira da Silva from the Noun Project -->
+    <!-- GPS by Hea Poh Lin from the Noun Project -->
+    <!-- Actuality by Ralf Schmitzer from the Noun Project -->
+    <!-- Sync by P.J. Onori from the Noun Project -->
+    <!-- Check Mark by Jivan from the Noun Project -->
+    <!-- Satellite GPS by Tomasz Pasternak from the Noun Project -->
+
+    <link rel="stylesheet" type="text/css" href="css/loading.css"/>
+
+    <style>
+/*https://css-tricks.com/equidistant-objects-with-css/*/
+    #controls {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    #go {
+      display: none;
+    }
+
+    #signal {
+      display: none;
+    }
+
+    #syncing {
+      /*display: none;*/
+    }
+
+    #done {
+      display: none;
+    }
+
+
+    </style>
+
+
+
+  </head>
+
+
+
+<body>
+
+  <div id="display">
+    <object id='signal' type="image/svg+xml" data="icons/satellite.svg" class="ld"></object>
+    <object id='go' type="image/svg+xml" data="icons/move.svg" class="ld"></object>
+    <object id='syncing' type="image/svg+xml" data="icons/sync.svg" class="ld"></object>
+    <object id='done' type="image/svg+xml" data="icons/success.svg" class="ld"></object>
+  </div>
+<div id="controls">
+  <object id='locationStatus' type="image/svg+xml" data="icons/gps.svg" class="ld"></object>
+  <object id='start' type="image/svg+xml" data="icons/record.svg" class="ld"></object>
+  <object id='stop' type="image/svg+xml" data="icons/pause.svg" class="ld"></object>
+  <object id='transmit' type="image/svg+xml" data="icons/upload.svg" class="ld"></object>
+</div>
+
+<script>
+
+window.onload=function() {
+
+  // TOP FOUR DISPLAY ICONS
+
+  var sat = document.getElementById("signal")
+                     .contentDocument.getElementById("satellite");
+
+  var move = document.getElementById("go")
+                     .contentDocument.getElementById('move');
+
+  var sync = document.getElementById("syncing")
+                     .contentDocument.getElementById('sync');
+
+  var success = document.getElementById("done")
+                     .contentDocument.getElementById('success');
+
+
+  // BOTTOM FOUR BUTTONS
+  var gps = document.getElementById("locationStatus")
+                    .contentDocument.getElementById('gps');
+
+  var record = document.getElementById("start")
+                       .contentDocument.getElementById('record');
+
+  var pause = document.getElementById("stop")
+                      .contentDocument.getElementById('pause');
+
+  var upload = document.getElementById("transmit")
+                       .contentDocument.getElementById('upload');
+
+
+ var cars = [
+   {
+     model: "Peugeot",
+     color: "blue",
+     registration: 2012,
+     checkups: [2015, 2017]
+   },
+   {
+     model: "Citroën",
+     color: "white",
+     registration: 1999,
+     checkups: [2003, 2005, 2007, 2009, 2011, 2013]
+   }
+ ];
+
+// https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+
+
+// upload.addEventListener("click", function(e){
+//
+//   uploadData(cars, uploadSuccess, uploadFail);
+//
+//
+// });
+
+
+
+
+
+var uploadData = function(data, successCB, failureCB){
+
+    document.getElementById("syncing").classList.add("ld-cycle");
+
+    fetch("https://crld.in:8084/upload", {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    }).then(response => {
+
+      if(response.ok){
+
+        return response.json();
+      }
+
+    })
+    .then(successCB)
+    .catch(failureCB)
+
+  }
+
+  var uploadSuccess = function(json){
+    console.log(json);
+    document.getElementById("syncing").classList.remove("ld-cycle");
+    sync.setAttribute("fill", "green");
+  }
+
+  var uploadFail = function(err){
+
+    console.error("There's an error:");
+    console.error(err.message);
+    sync.setAttribute("fill", "red");
+    document.getElementById("syncing").classList.remove("ld-cycle");
+
+  }
+
+  upload.addEventListener('click', function(){
+
+      uploadData(cars, uploadSuccess, uploadFail);
+
+  });
+
+
+}
+
+
+
+</script>
+
+
+<!-- <img src="icons/gps.svg" class="ld ld-spin"/> -->
+</body>
+
+
+</html>
